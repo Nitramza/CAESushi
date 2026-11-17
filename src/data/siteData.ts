@@ -1,0 +1,138 @@
+export type MenuCategory = "Rollos" | "Entradas" | "Especialidades" | "Bebidas";
+
+export interface MenuItem {
+  name: string;
+  category: MenuCategory;
+  description: string;
+  image: string;
+  imageAlt: string;
+  tag?: string;
+}
+
+export const siteData = {
+  name: "CAE Sushi",
+  instagramUrl: "https://www.instagram.com/cae_sushi/",
+  facebookUrl: "https://www.facebook.com/caesushi/",
+  whatsappNumber: "522222540764",
+  whatsappMessage: "¡Hola CAE Sushi! 🍣 Se me antojó un rollo y quiero pedir la promoción del día. ¿Qué tienen disponible ahorita?",
+  phone: "+52 222 254 0764",
+  logo: "/images/cae-logo-transparent.png",
+  heroImage: "/images/rollo-closeup.jpg",
+  promotionImage: "/images/rollo-gratinado.jpg",
+  address: "Av. 5 de Mayo 4c, Centro San Andrés Cholula, 72810 San Andrés Cholula, Pue., Mexico",
+  addressParts: {
+    streetAddress: "Av. 5 de Mayo 4c, Centro",
+    addressLocality: "San Andrés Cholula",
+    addressRegion: "Puebla",
+    postalCode: "72810",
+    addressCountry: "MX",
+  },
+  menuCategories: ["Todos", "Rollos", "Entradas", "Especialidades", "Bebidas"] as const,
+  menuItems: [
+    {
+      name: "Rocca",
+      category: "Rollos",
+      description: "Camarón, un toque picosito y una buena bañada de salsa cremosa. 12 piezas para compartir.",
+      image: "/images/rocca-clean.jpg",
+      imageAlt: "Rollo Rocca de camarón con salsa cremosa",
+      tag: "12 piezas",
+    },
+    {
+      name: "Rollo empanizado Monster",
+      category: "Rollos",
+      description: "Empanizado y bañado en salsa; un rollo grande que no se esconde debajo de la cama.",
+      image: "/images/monster.jpg",
+      imageAlt: "Rollo Monster empanizado con salsa",
+      tag: "De la casa",
+    },
+    {
+      name: "Salmoncito especial",
+      category: "Rollos",
+      description: "Lo meten al horno, lo gratinan y lo bañan en salsa. Salmoncito especial, hecho con cariño.",
+      image: "/images/salmoncito.jpg",
+      imageAlt: "Salmoncito especial gratinado y bañado en salsa",
+    },
+    {
+      name: "Guamuchilito",
+      category: "Rollos",
+      description: "Porque el antojo empieza con los ojos, pero se queda por el sabor.",
+      image: "/images/guamuchilito.jpg",
+      imageAlt: "Rollo Guamuchilito de CAE Sushi",
+    },
+    {
+      name: "Spring rolls",
+      category: "Entradas",
+      description: "Doraditos y crujientes, ideales para compartir junto con tus rollos favoritos.",
+      image: "/images/spring-rolls-clean.jpg",
+      imageAlt: "Spring rolls dorados servidos con arroz",
+    },
+    {
+      name: "Rollitos de camarón",
+      category: "Entradas",
+      description: "Rollitos de camarón servidos con arroz y salsa para acompañar.",
+      image: "/images/spring-rolls-clean.jpg",
+      imageAlt: "Rollitos de camarón de CAE Sushi",
+    },
+    {
+      name: "Aguachile",
+      category: "Especialidades",
+      description: "Fresco, picosito y con ese golpe cítrico que hace que una pieza nunca sea suficiente.",
+      image: "/images/aguachile.jpg",
+      imageAlt: "Aguachile fresco de CAE Sushi",
+      tag: "Picosito",
+    },
+    {
+      name: "Bomba mar y tierra",
+      category: "Especialidades",
+      description: "Doradita por fuera, bien servida por dentro.",
+      image: "/images/bomba.jpg",
+      imageAlt: "Bomba mar y tierra dorada y servida con salsa",
+    },
+    {
+      name: "Bebidas frescas",
+      category: "Bebidas",
+      description: "Mojito, fresa limón, Calpis y té de jazmín para acompañar tu sushi.",
+      image: "/images/bebidas.jpg",
+      imageAlt: "Mojito, fresa limón, Calpis y té de jazmín de CAE Sushi",
+    },
+  ] satisfies MenuItem[],
+  promotion: {
+    label: "Promoción del día",
+    title: "Hoy se antoja compartir.",
+    description: "Escríbenos para conocer la promoción vigente y armar tu pedido.",
+  },
+  menuNote: "Descripciones tomadas de publicaciones de CAE Sushi. Confirma disponibilidad e ingredientes al ordenar.",
+  googleReviews: {
+    rating: "4.6",
+    count: 99,
+    url: "https://www.google.com/maps/search/?api=1&query=Sushi+CAE+Av.+5+de+Mayo+4C+San+Andr%C3%A9s+Cholula",
+    excerpts: [
+      {
+        author: "Monserrat Lechuga",
+        quote: "Sushi culichi delicioso, la porción es muy buena, y tienen una gran variedad.",
+        date: "Hace 2 meses",
+      },
+      {
+        author: "Martín Vázquez",
+        quote: "Excelente servicio, fui con mi familia y muy rica la comida.",
+        date: "Hace 2 meses",
+      },
+      {
+        author: "Joana Janeiro",
+        quote: "Deliciosooo, excelente servicio todo muy limpio!! 100% culichi.",
+        date: "Hace 1 mes",
+      },
+    ],
+  },
+} as const;
+
+export function withBasePath(path: string) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  return `${basePath}${path}`;
+}
+
+export function getWhatsAppUrl(message: string = siteData.whatsappMessage) {
+  const phone = siteData.whatsappNumber.replace(/\D/g, "");
+  const baseUrl = phone ? `https://wa.me/${phone}` : "https://wa.me/";
+  return `${baseUrl}?text=${encodeURIComponent(message)}`;
+}
