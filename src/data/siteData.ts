@@ -11,6 +11,26 @@ export interface MenuItem {
 
 export const siteData = {
   name: "CAE Sushi",
+  description:
+    "Sushi estilo culichi preparado al momento en San Andrés Cholula, Puebla. Conoce la carta de CAE Sushi y pide la promoción del día por WhatsApp.",
+  servesCuisine: "Japanese, Sushi",
+  priceRange: "$$",
+  geo: {
+    latitude: 19.0510597,
+    longitude: -98.2992744,
+  },
+  openingHoursSpecification: [
+    {
+      dayOfWeek: ["Monday", "Tuesday", "Thursday", "Friday", "Saturday"],
+      opens: "14:00",
+      closes: "22:00",
+    },
+    {
+      dayOfWeek: ["Sunday"],
+      opens: "13:00",
+      closes: "19:00",
+    },
+  ],
   instagramUrl: "https://www.instagram.com/cae_sushi/",
   facebookUrl: "https://www.facebook.com/caesushi/",
   whatsappNumber: "522222540764",
@@ -125,6 +145,10 @@ export const siteData = {
     ],
   },
 } as const;
+
+export const siteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://cae-sushi.pages.dev"
+).replace(/\/+$/, "");
 
 export function withBasePath(path: string) {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";

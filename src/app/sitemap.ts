@@ -1,8 +1,7 @@
 import type { MetadataRoute } from "next";
+import { siteData, siteUrl, withBasePath } from "@/data/siteData";
 
 export const dynamic = "force-static";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://caesushi.example";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
@@ -11,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1,
+      images: [new URL(withBasePath(siteData.heroImage), `${siteUrl}/`).toString()],
     },
   ];
 }

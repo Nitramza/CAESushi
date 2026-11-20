@@ -49,10 +49,10 @@ function SlideFooter({ showSocials = false }: { showSocials?: boolean }) {
       {showSocials && (
         <div className="social-links">
           <span>Nuestras redes sociales</span>
-          <a href={siteData.facebookUrl} target="_blank" rel="noreferrer" aria-label="CAE Sushi en Facebook">
+          <a href={siteData.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="CAE Sushi en Facebook">
             <SiFacebook size={18} aria-hidden="true" />
           </a>
-          <a href={siteData.instagramUrl} target="_blank" rel="noreferrer" aria-label="CAE Sushi en Instagram">
+          <a href={siteData.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="CAE Sushi en Instagram">
             <SiInstagram size={19} aria-hidden="true" />
           </a>
         </div>
@@ -101,7 +101,7 @@ function SiteHeader({
           className="header-order"
           href={getWhatsAppUrl()}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
         >
           <SiWhatsapp size={19} aria-hidden="true" />
           <span>¡CAEle por WhatsApp!</span>
@@ -145,7 +145,7 @@ function SiteHeader({
               className="mobile-order"
               href={getWhatsAppUrl()}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               <SiWhatsapp size={19} aria-hidden="true" />
               ¡CAEle por WhatsApp!
@@ -160,7 +160,7 @@ function SiteHeader({
           className="mobile-order-fab"
           href={getWhatsAppUrl()}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           aria-label="Pedir por WhatsApp"
           title="Pedir por WhatsApp"
           tabIndex={0}
@@ -328,7 +328,7 @@ function ReviewsSection() {
             <p className="eyebrow"><span /> Lo que cuentan en Google</p>
             <h2>Buen sushi.<br /><em>Buena compañía.</em></h2>
           </div>
-          <a className="google-rating" href={siteData.googleReviews.url} target="_blank" rel="noreferrer">
+          <a className="google-rating" href={siteData.googleReviews.url} target="_blank" rel="noopener noreferrer">
             <span className="rating-score">{siteData.googleReviews.rating}</span>
             <span className="rating-detail">
               <span className="rating-stars" aria-label={`${siteData.googleReviews.rating} de 5 estrellas`}>
@@ -353,7 +353,7 @@ function ReviewsSection() {
             </article>
           ))}
         </div>
-        <a className="text-link all-reviews-link" href={siteData.googleReviews.url} target="_blank" rel="noreferrer">
+        <a className="text-link all-reviews-link" href={siteData.googleReviews.url} target="_blank" rel="noopener noreferrer">
           Leer opiniones en Google <ArrowUpRight size={16} aria-hidden="true" />
         </a>
       </div>
@@ -380,7 +380,7 @@ function LocationSection() {
               <address>{siteData.address}</address>
             </div>
           </div>
-          <a className="button button-primary" href={directionsUrl} target="_blank" rel="noreferrer">
+          <a className="button button-primary" href={directionsUrl} target="_blank" rel="noopener noreferrer">
             Cómo llegar <ArrowUpRight size={17} aria-hidden="true" />
           </a>
         </div>
@@ -392,7 +392,7 @@ function LocationSection() {
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen
           />
-          <a className="map-caption" href={directionsUrl} target="_blank" rel="noreferrer">
+          <a className="map-caption" href={directionsUrl} target="_blank" rel="noopener noreferrer">
             <span><MapPin size={16} aria-hidden="true" /> San Andrés Cholula, Puebla</span>
             <ArrowUpRight size={16} aria-hidden="true" />
           </a>

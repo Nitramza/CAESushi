@@ -1,5 +1,6 @@
 ---
 description: "Arquitecto Frontend y Diseñador UI/UX experto en Next.js estático, Tailwind CSS, sistemas de color 60-30-10 y microinteracciones con Framer Motion."
+model: "Claude Sonnet 5.5"
 tools: ['codebase', 'editFiles', 'runCommands', 'search']
 ---
 
