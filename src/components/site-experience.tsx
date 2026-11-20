@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from "react";
 import Image from "next/image";
 import {
   AnimatePresence,
@@ -27,6 +27,23 @@ const navItems = [
   { label: "Opiniones", href: "#opiniones" },
   { label: "¿Dónde le CAEs?", href: "#ubicacion" },
 ];
+
+const slideEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const slideVariants: Variants = {
+  inactive: { opacity: 0.55, y: 10, filter: "blur(4px)" },
+  active: { opacity: 1, y: 0, filter: "blur(0px)" },
+};
+
+// El estado inicial depende solo de `active` para que SSR e hidratación coincidan.
+function useSlideFocus(active: boolean) {
+  const reduceMotion = useReducedMotion();
+  return {
+    variants: slideVariants,
+    initial: active ? "active" : "inactive",
+    animate: active ? "active" : "inactive",
+    transition: reduceMotion ? { duration: 0 } : { duration: 0.35, ease: slideEase },
+  };
+}
 
 function BrandMark() {
   return (
@@ -85,17 +102,20 @@ function SiteHeader({
       <div className="header-inner container">
         <BrandMark />
         <nav className="desktop-nav" aria-label="Navegación principal">
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              className={activeSection === item.href.slice(1) ? "active" : undefined}
-              href={item.href}
-              aria-current={activeSection === item.href.slice(1) ? "page" : undefined}
-              onClick={(event) => navigate(event, item.href)}
-            >
-              {item.label}
-            </a>
-          ))}
+          {navItems.map((item) => {
+            const isActive = activeSection === item.href.slice(1);
+            return (
+              <a
+                key={item.href}
+                className={isActive ? "active" : undefined}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                onClick={(event) => navigate(event, item.href)}
+              >
+                {item.label}
+              </a>
+            );
+          })}
         </nav>
         <a
           className="header-order"
@@ -129,18 +149,21 @@ function SiteHeader({
             exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
             transition={{ duration: reduceMotion ? 0 : 0.18 }}
           >
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                className={activeSection === item.href.slice(1) ? "active" : undefined}
-                href={item.href}
-                aria-current={activeSection === item.href.slice(1) ? "page" : undefined}
-                onClick={(event) => navigate(event, item.href)}
-              >
-                {item.label}
-                <ArrowUpRight size={16} aria-hidden="true" />
-              </a>
-            ))}
+            {navItems.map((item) => {
+              const isActive = activeSection === item.href.slice(1);
+              return (
+                <a
+                  key={item.href}
+                  className={isActive ? "active" : undefined}
+                  href={item.href}
+                  aria-current={isActive ? "page" : undefined}
+                  onClick={(event) => navigate(event, item.href)}
+                >
+                  {item.label}
+                  <ArrowUpRight size={16} aria-hidden="true" />
+                </a>
+              );
+            })}
             <a
               className="mobile-order"
               href={getWhatsAppUrl()}
@@ -178,13 +201,12 @@ function SiteHeader({
   );
 }
 
-function MenuSection() {
+function MenuSection({ active }: { active: boolean }) {
   const [activeCategory, setActiveCategory] = useState<(typeof siteData.menuCategories)[number]>(
     "Todos",
   );
-  const [isMounted, setIsMounted] = useState(false);
   const reduceMotion = useReducedMotion();
-  useEffect(() => setIsMounted(true), []);
+  const slideFocus = useSlideFocus(active);
   const listVariants: Variants = {
     hidden: {},
     visible: {
@@ -192,7 +214,7 @@ function MenuSection() {
     },
   };
   const cardVariants: Variants = {
-    hidden: { opacity: 0, y: 18 },
+    hidden: { opacity: 0, y: 12 },
     visible: {
       opacity: 1,
       y: 0,
@@ -214,7 +236,7 @@ function MenuSection() {
   }
 
   return (
-    <section className="menu-section section-space story-slide" id="menu">
+    <motion.section className="menu-section section-space story-slide" id="menu" {...slideFocus}>
       <div className="container">
         <div className="section-heading menu-heading">
           <div>
@@ -255,8 +277,7 @@ function MenuSection() {
             className="menu-grid"
             variants={listVariants}
             initial="hidden"
-            whileInView={isMounted ? "visible" : undefined}
-            viewport={{ once: true, amount: 0.12 }}
+            animate="visible"
             exit="hidden"
             key={activeCategory}
           >
@@ -289,13 +310,15 @@ function MenuSection() {
         <p className="data-note">{siteData.menuNote}</p>
       </div>
       <SlideFooter />
-    </section>
+    </motion.section>
   );
 }
 
-function PromotionSection() {
+function PromotionSection({ active }: { active: boolean }) {
+  const slideFocus = useSlideFocus(active);
+
   return (
-    <section className="promotion-section section-space story-slide" id="promocion">
+    <motion.section className="promotion-section section-space story-slide" id="promocion" {...slideFocus}>
       <div className="container">
         <div className="promotion-panel">
           <div
@@ -315,13 +338,15 @@ function PromotionSection() {
         </div>
       </div>
       <SlideFooter />
-    </section>
+    </motion.section>
   );
 }
 
-function ReviewsSection() {
+function ReviewsSection({ active }: { active: boolean }) {
+  const slideFocus = useSlideFocus(active);
+
   return (
-    <section className="reviews-section section-space story-slide" id="opiniones">
+    <motion.section className="reviews-section section-space story-slide" id="opiniones" {...slideFocus}>
       <div className="container">
         <div className="reviews-heading">
           <div>
@@ -340,14 +365,13 @@ function ReviewsSection() {
           </a>
         </div>
         <div className="review-grid">
-          {siteData.googleReviews.excerpts.map((review) => (
-            <article className="review-card" key={review.author}>
+          {siteData.googleReviews.excerpts.map((review, index) => (
+            <article className="review-card" key={index}>
               <div className="review-stars" aria-label="5 de 5 estrellas">
                 {Array.from({ length: 5 }, (_, index) => <Star key={index} size={13} fill="currentColor" aria-hidden="true" />)}
               </div>
               <blockquote>“{review.quote}”</blockquote>
               <div className="review-author">
-                <strong>{review.author}</strong>
                 <span>{review.date} · Google</span>
               </div>
             </article>
@@ -358,16 +382,17 @@ function ReviewsSection() {
         </a>
       </div>
       <SlideFooter />
-    </section>
+    </motion.section>
   );
 }
 
-function LocationSection() {
+function LocationSection({ active }: { active: boolean }) {
+  const slideFocus = useSlideFocus(active);
   const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(siteData.address)}&output=embed`;
   const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(siteData.address)}`;
 
   return (
-    <section className="location-section section-space story-slide" id="ubicacion">
+    <motion.section className="location-section section-space story-slide" id="ubicacion" {...slideFocus}>
       <div className="container location-layout">
         <div className="location-copy">
           <p className="eyebrow"><span /> ¿Dónde le CAEs?</p>
@@ -399,13 +424,15 @@ function LocationSection() {
         </div>
       </div>
       <SlideFooter showSocials />
-    </section>
+    </motion.section>
   );
 }
 
 export function SiteExperience() {
   const [activeSection, setActiveSection] = useState("inicio");
+  const navigationTarget = useRef<string | null>(null);
   const reduceMotion = useReducedMotion();
+  const heroFocus = useSlideFocus(activeSection === "inicio");
 
   useEffect(() => {
     const deck = document.querySelector<HTMLElement>(".story-deck");
@@ -413,6 +440,7 @@ export function SiteExperience() {
 
     const slides = Array.from(deck.querySelectorAll<HTMLElement>(".story-slide"));
     let frame = 0;
+    let settleTimer = 0;
     const updateActiveSection = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
@@ -426,17 +454,30 @@ export function SiteExperience() {
           );
           return slideDistance < closestDistance ? slide : closest;
         });
+        if (navigationTarget.current && navigationTarget.current !== activeSlide.id) return;
+        navigationTarget.current = null;
         setActiveSection(activeSlide.id);
       });
     };
+    const handleDeckScroll = () => {
+      updateActiveSection();
+      if (!navigationTarget.current) return;
 
-    deck.addEventListener("scroll", updateActiveSection, { passive: true });
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        navigationTarget.current = null;
+        updateActiveSection();
+      }, 180);
+    };
+
+    deck.addEventListener("scroll", handleDeckScroll, { passive: true });
     window.addEventListener("resize", updateActiveSection);
     updateActiveSection();
     return () => {
-      deck.removeEventListener("scroll", updateActiveSection);
+      deck.removeEventListener("scroll", handleDeckScroll);
       window.removeEventListener("resize", updateActiveSection);
       cancelAnimationFrame(frame);
+      window.clearTimeout(settleTimer);
     };
   }, []);
 
@@ -461,6 +502,7 @@ export function SiteExperience() {
     const section = document.getElementById(sectionId);
     if (!deck || !section) return;
 
+    navigationTarget.current = sectionId;
     setActiveSection(sectionId);
     history.replaceState(null, "", `#${sectionId}`);
     const offset = section.getBoundingClientRect().left - deck.getBoundingClientRect().left;
@@ -479,7 +521,7 @@ export function SiteExperience() {
         aria-label="Secciones del sitio. Usa las flechas izquierda y derecha para cambiar de sección."
         onKeyDown={handleDeckKeyDown}
       >
-        <section className="hero-section story-slide" id="inicio">
+        <motion.section className="hero-section story-slide" id="inicio" {...heroFocus}>
           <div className="hero-pattern" aria-hidden="true" />
           <div className="container hero-layout">
             <div className="hero-copy">
@@ -510,12 +552,12 @@ export function SiteExperience() {
             <span>San Andrés Cholula, Pue.</span>
           </div>
           <SlideFooter />
-        </section>
+        </motion.section>
 
-        <MenuSection />
-        <PromotionSection />
-        <ReviewsSection />
-        <LocationSection />
+        <MenuSection active={activeSection === "menu"} />
+        <PromotionSection active={activeSection === "promocion"} />
+        <ReviewsSection active={activeSection === "opiniones"} />
+        <LocationSection active={activeSection === "ubicacion"} />
       </main>
     </>
   );

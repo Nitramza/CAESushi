@@ -128,19 +128,16 @@ export const siteData = {
     url: "https://www.google.com/maps/search/?api=1&query=Sushi+CAE+Av.+5+de+Mayo+4C+San+Andr%C3%A9s+Cholula",
     excerpts: [
       {
-        author: "Monserrat Lechuga",
-        quote: "Sushi culichi delicioso, la porción es muy buena, y tienen una gran variedad.",
-        date: "Hace 2 meses",
+        quote: "deliciosooo, excelente servicio todo muy limpio!! 100% culichi. Si pueden pídanse un chile relleno no se van a arrepentir.",
+        date: "Hace un mes",
       },
       {
-        author: "Martín Vázquez",
         quote: "Excelente servicio, fui con mi familia y muy rica la comida.",
         date: "Hace 2 meses",
       },
       {
-        author: "Joana Janeiro",
-        quote: "Deliciosooo, excelente servicio todo muy limpio!! 100% culichi.",
-        date: "Hace 1 mes",
+        quote: "La verdad es que muchas veces los lugares que recomiendan en algunas cuentas de Tik Tok no resultan ser buenos, pero este lugar sí es muy, pero muy rico. Nunca probé sushi sinaloense; viví en Tijuana y allá hay muchos, pero jamás los probé, pero puedo decir que este es muy, pero muy rico...",
+        date: "Hace un mes",
       },
     ],
   },
