@@ -1,9 +1,19 @@
-export type MenuCategory = "Rollos" | "Entradas" | "Especialidades" | "Bebidas";
+export type MenuCategory =
+  | "Rollos naturales"
+  | "Rollos empanizados"
+  | "Rollos horneados"
+  | "Entradas"
+  | "Arroces"
+  | "Bebidas";
 
 export interface MenuItem {
   name: string;
   category: MenuCategory;
-  description: string;
+  price: string;
+  inside?: string;
+  outside?: string;
+  topping?: string;
+  description?: string;
   image: string;
   imageAlt: string;
   tag?: string;
@@ -37,8 +47,8 @@ export const siteData = {
   whatsappMessage: "¡Hola CAE Sushi! 🍣 Se me antojó un rollo y quiero pedir la promoción del día. ¿Qué tienen disponible ahorita?",
   phone: "+52 222 254 0764",
   logo: "/images/cae-logo-transparent.png",
-  heroImage: "/images/rollo-closeup.jpg",
-  promotionImage: "/images/rollo-gratinado.jpg",
+  heroImage: "/images/fondo-platillos.webp",
+  promotionImage: "/images/promo.webp",
   address: "Av. 5 de Mayo 4c, Centro San Andrés Cholula, 72810 San Andrés Cholula, Pue., Mexico",
   addressParts: {
     streetAddress: "Av. 5 de Mayo 4c, Centro",
@@ -47,81 +57,74 @@ export const siteData = {
     postalCode: "72810",
     addressCountry: "MX",
   },
-  menuCategories: ["Todos", "Rollos", "Entradas", "Especialidades", "Bebidas"] as const,
+  menuCategories: [
+    "Todos",
+    "Rollos naturales",
+    "Rollos empanizados",
+    "Rollos horneados",
+    "Entradas",
+    "Arroces",
+    "Bebidas",
+  ] as const,
   menuItems: [
-    {
-      name: "Rocca",
-      category: "Rollos",
-      description: "Camarón, un toque picosito y una buena bañada de salsa cremosa. 12 piezas para compartir.",
-      image: "/images/rocca-clean.jpg",
-      imageAlt: "Rollo Rocca de camarón con salsa cremosa",
-      tag: "12 piezas",
-    },
-    {
-      name: "Rollo empanizado Monster",
-      category: "Rollos",
-      description: "Empanizado y bañado en salsa; un rollo grande que no se esconde debajo de la cama.",
-      image: "/images/monster.jpg",
-      imageAlt: "Rollo Monster empanizado con salsa",
-      tag: "De la casa",
-    },
-    {
-      name: "Salmoncito especial",
-      category: "Rollos",
-      description: "Lo meten al horno, lo gratinan y lo bañan en salsa. Salmoncito especial, hecho con cariño.",
-      image: "/images/salmoncito.jpg",
-      imageAlt: "Salmoncito especial gratinado y bañado en salsa",
-    },
-    {
-      name: "Guamuchilito",
-      category: "Rollos",
-      description: "Porque el antojo empieza con los ojos, pero se queda por el sabor.",
-      image: "/images/guamuchilito.jpg",
-      imageAlt: "Rollo Guamuchilito de CAE Sushi",
-    },
-    {
-      name: "Spring rolls",
-      category: "Entradas",
-      description: "Doraditos y crujientes, ideales para compartir junto con tus rollos favoritos.",
-      image: "/images/spring-rolls-clean.jpg",
-      imageAlt: "Spring rolls dorados servidos con arroz",
-    },
-    {
-      name: "Rollitos de camarón",
-      category: "Entradas",
-      description: "Rollitos de camarón servidos con arroz y salsa para acompañar.",
-      image: "/images/spring-rolls-clean.jpg",
-      imageAlt: "Rollitos de camarón de CAE Sushi",
-    },
-    {
-      name: "Aguachile",
-      category: "Especialidades",
-      description: "Fresco, picosito y con ese golpe cítrico que hace que una pieza nunca sea suficiente.",
-      image: "/images/aguachile.jpg",
-      imageAlt: "Aguachile fresco de CAE Sushi",
-      tag: "Picosito",
-    },
-    {
-      name: "Bomba mar y tierra",
-      category: "Especialidades",
-      description: "Doradita por fuera, bien servida por dentro.",
-      image: "/images/bomba.jpg",
-      imageAlt: "Bomba mar y tierra dorada y servida con salsa",
-    },
-    {
-      name: "Bebidas frescas",
-      category: "Bebidas",
-      description: "Mojito, fresa limón, Calpis y té de jazmín para acompañar tu sushi.",
-      image: "/images/bebidas.jpg",
-      imageAlt: "Mojito, fresa limón, Calpis y té de jazmín de CAE Sushi",
-    },
+    { name: "Dragón", category: "Rollos naturales", price: "$229", inside: "Camarones tempura", outside: "Salmón y aguacate", topping: "Spicy kanikama y atún", image: "/images/salmoncito.jpg", imageAlt: "Rollo Dragón de referencia", tag: "Natural" },
+    { name: "Rocca", category: "Rollos naturales", price: "$219", inside: "Surimi y camarón", topping: "Camarones bañados en salsa especial, tampico, aguacate y kanikama", image: "/images/rocca-clean.jpg", imageAlt: "Rollo Rocca de referencia" },
+    { name: "Kanny", category: "Rollos naturales", price: "$209", inside: "Camarón empanizado", topping: "Spicy de kanikama frito y camarones empanizados en salsa de sriracha", image: "/images/monster.jpg", imageAlt: "Rollo Kanny de referencia" },
+    { name: "Mechudo", category: "Rollos naturales", price: "$209", inside: "Camarón y surimi", topping: "Camarón, ajonjolí, salsa de anguila y spicy kanikama", image: "/images/rocca.jpg", imageAlt: "Rollo Mechudo de referencia" },
+    { name: "Secret", category: "Rollos naturales", price: "$209", inside: "Surimi y camarón", topping: "Queso crema, kanikama, aguacate, chile serrano y furikake", image: "/images/sushi-seleccion.jpg", imageAlt: "Rollo Secret de referencia" },
+    { name: "Salmón c", category: "Rollos naturales", price: "$209", inside: "Surimi y camarón", topping: "Forrado en salmón, salsa de anguila, ajonjolín, cebollín y masago", image: "/images/salmoncito.jpg", imageAlt: "Rollo Salmón C de referencia" },
+    { name: "Guamuchilito", category: "Rollos naturales", price: "$209", inside: "Camarón y surimi", topping: "Camarón, tampico, aguacate, salsa de anguila, ajonjolí y cebollín", description: "*Pídelo empanizado.", image: "/images/guamuchilito.jpg", imageAlt: "Rollo Guamuchilito de referencia", tag: "Pídelo empanizado" },
+    { name: "777", category: "Rollos naturales", price: "$189", inside: "Surimi empanizado", topping: "Camarón, tampico, aguacate, kanikama, salsa de anguila y cebollín", image: "/images/rollo-closeup.jpg", imageAlt: "Rollo 777 de referencia" },
+    { name: "Ebi", category: "Rollos naturales", price: "$159", inside: "Camarón y surimi", topping: "Tampico, aguacate, ajonjolí y salsa de anguila", image: "/images/rocca-clean.jpg", imageAlt: "Rollo Ebi de referencia" },
+    { name: "Avocado", category: "Rollos naturales", price: "$139", inside: "Surimi, res o pollo", outside: "Aguacate y ajonjolí", image: "/images/guamuchilito.jpg", imageAlt: "Rollo Avocado de referencia" },
+    { name: "California", category: "Rollos naturales", price: "$99", inside: "Surimi", outside: "Ajonjolí", image: "/images/sushi-seleccion.jpg", imageAlt: "Rollo California de referencia", tag: "Clásico" },
+
+    { name: "Monster (doble)", category: "Rollos empanizados", price: "$279", inside: "Surimi, camarón, res y pollo", outside: "Tampico y aguacate", topping: "Queso gratinado, chipotle y tocino", image: "/images/monster.jpg", imageAlt: "Rollo Monster doble de referencia", tag: "Doble" },
+    { name: "Aguachile", category: "Rollos empanizados", price: "$229", inside: "Surimi y camarón", topping: "Aguachile de camarón", image: "/images/aguachile.jpg", imageAlt: "Rollo Aguachile de referencia" },
+    { name: "Culiacán", category: "Rollos empanizados", price: "$219", inside: "Camarón", outside: "Camarón", topping: "Camarón, tampico y kanikama", image: "/images/rocca.jpg", imageAlt: "Rollo Culiacán de referencia" },
+    { name: "Flaka", category: "Rollos empanizados", price: "$209", inside: "Res y pollo", outside: "Gratinado de gouda, chipotle y tocino", image: "/images/rollo-gratinado.jpg", imageAlt: "Rollo Flaka de referencia" },
+    { name: "Tokio", category: "Rollos empanizados", price: "$199", inside: "Camarón y surimi", topping: "Spicy de camarón empanizado, aguacate, salsa de anguila, mechas de kanikama y ajonjolí", image: "/images/monster.jpg", imageAlt: "Rollo Tokio de referencia" },
+    { name: "Green Crunch", category: "Rollos empanizados", price: "$199", inside: "Camarón", topping: "Spicy de camarón, tampico, aderezo de cilantro y ajonjolí", image: "/images/guamuchilito.jpg", imageAlt: "Rollo Green Crunch de referencia" },
+    { name: "Machi", category: "Rollos empanizados", price: "$199", inside: "Res y surimi", outside: "Gratinado de gouda y chile serrano", topping: "Tampico, aguacate y salsa de anguila", image: "/images/bomba.jpg", imageAlt: "Rollo Machi de referencia" },
+    { name: "Picosito", category: "Rollos empanizados", price: "$189", inside: "Res, tocino y chile toreado", outside: "Gratinado de queso gouda y chile serrano", topping: "Guacamole y ajonjolí", image: "/images/rollo-gratinado.jpg", imageAlt: "Rollo Picosito de referencia", tag: "Picosito" },
+    { name: "Bacon", category: "Rollos empanizados", price: "$159", inside: "Camarón, res o pollo y tocino", outside: "Gratinado de gouda y queso crema", image: "/images/bomba.jpg", imageAlt: "Rollo Bacon de referencia" },
+    { name: "Mar y Tierra", category: "Rollos empanizados", price: "$149", inside: "Camarón y res", image: "/images/monster.jpg", imageAlt: "Rollo Mar y Tierra de referencia" },
+    { name: "Tres Quesos", category: "Rollos empanizados", price: "$149", inside: "Res y pollo con queso americano", topping: "Queso crema y gouda", image: "/images/rollo-gratinado.jpg", imageAlt: "Rollo Tres Quesos de referencia" },
+
+    { name: "Campechano", category: "Rollos horneados", price: "$279", inside: "Camarón", topping: "Trozos de kanikama, salmón y camarón bañados en aderezo especial, salsa de anguila, camarones empanizados y ajonjolí", image: "/images/salmoncito.jpg", imageAlt: "Rollo Campechano de referencia", tag: "Horneado" },
+    { name: "Salmoncito Especial", category: "Rollos horneados", price: "$239", inside: "Camarón y surimi", outside: "Salmón", topping: "Gratinado especial de camarón, mechas de kanikama fritas y aderezo especial", image: "/images/salmoncito.jpg", imageAlt: "Salmoncito Especial de referencia" },
+    { name: "Acá y Allá", category: "Rollos horneados", price: "$239", inside: "Res, pollo y tocino", outside: "Empanizado", topping: "Queso crema, gouda, chile serrano, res, pollo y tocino", image: "/images/monster.jpg", imageAlt: "Rollo Acá y Allá de referencia" },
+    { name: "To-Te", category: "Rollos horneados", price: "$239", inside: "Camarón y surimi", outside: "Empanizado", topping: "Tampico, aderezo especial, cebollín, salsa de anguila, ajonjolí, aguacate y camarón", image: "/images/rollo-gratinado.jpg", imageAlt: "Rollo To-Te de referencia" },
+    { name: "Pizza en las Glorias", category: "Rollos horneados", price: "$239", inside: "Camarón", topping: "Camarón, aderezo de cilantro, queso crema, gouda, chile serrano, salsa de anguila y ajonjolí", image: "/images/rollo-gratinado.jpg", imageAlt: "Rollo Pizza en las Glorias de referencia" },
+
+    { name: "Chiles Rellenos", category: "Entradas", price: "$169", description: "2 piezas rellenas de queso crema y tampico, gratinadas con queso gouda y tocino. A elegir: res, pollo o camarón.", image: "/images/bomba.jpg", imageAlt: "Chiles rellenos de referencia" },
+    { name: "Aguachile", category: "Entradas", price: "$159", description: "Camarón o atún curtido en limón, pepino, cebolla morada y chile chiltepín, acompañado de salsas negras.", image: "/images/aguachile.jpg", imageAlt: "Aguachile de referencia", tag: "Fresco" },
+    { name: "Tostada de Atún", category: "Entradas", price: "$159", description: "Cubos de atún fresco acompañados de pepino, aguacate, cebollín y aceite de ajonjolí.", image: "/images/sushi-seleccion.jpg", imageAlt: "Tostada de atún de referencia" },
+    { name: "Rocca", category: "Entradas", price: "$159", description: "Camarones roca acompañados de una cama de arroz, zanahoria y ajonjolí.", image: "/images/rocca-clean.jpg", imageAlt: "Camarones Rocca de referencia" },
+    { name: "Rollo Camarón", category: "Entradas", price: "$149", description: "3 piezas de rollito de harina relleno de queso crema y camarones.", image: "/images/spring-rolls-clean.jpg", imageAlt: "Rollo camarón de referencia" },
+    { name: "Brochetas", category: "Entradas", price: "$149", description: "Cubos de queso gouda o camarones empanizados con salsa de anguila y ajonjolí.", image: "/images/bomba.jpg", imageAlt: "Brochetas de referencia" },
+    { name: "Spring Roll", category: "Entradas", price: "$139", description: "4 rollos primavera fritos rellenos de vegetales.", image: "/images/spring-rolls-clean.jpg", imageAlt: "Spring roll de referencia" },
+
+    { name: "Yakimeshi Orange", category: "Arroces", price: "$189", description: "Arroz frito con verduras, aguacate, queso crema, chicharrón de salmón bañado en salsa de naranja y topping de tampico.", image: "/images/rocca.jpg", imageAlt: "Yakimeshi Orange de referencia", tag: "Especial" },
+    { name: "Gohan C", category: "Arroces", price: "$169", description: "Tazón de arroz blanco con res, pollo, camarones empanizados, aguacate, queso crema y topping de tampico.", image: "/images/sushi-seleccion.jpg", imageAlt: "Gohan C de referencia" },
+    { name: "Yakimeshi C", category: "Arroces", price: "$169", description: "Arroz frito con verduras, res, pollo, camarones, aguacate, queso crema y topping de tampico.", image: "/images/rocca.jpg", imageAlt: "Yakimeshi C de referencia" },
+
+    { name: "Caguama", category: "Bebidas", price: "$89", image: "/images/bebidas.jpg", imageAlt: "Caguama de referencia" },
+    { name: "Rivadavia", category: "Bebidas", price: "$79", image: "/images/bebidas.jpg", imageAlt: "Rivadavia de referencia" },
+    { name: "Té helado de jazmín", category: "Bebidas", price: "$49", image: "/images/bebidas-detalle.jpg", imageAlt: "Té helado de jazmín de referencia" },
+    { name: "Calpis", category: "Bebidas", price: "$49", image: "/images/bebidas-detalle.jpg", imageAlt: "Calpis de referencia" },
+    { name: "Naranjada", category: "Bebidas", price: "$49", description: "Fresa o limón.", image: "/images/bebidas.jpg", imageAlt: "Naranjada de referencia" },
+    { name: "Refrescos", category: "Bebidas", price: "$39", image: "/images/bebidas-detalle.jpg", imageAlt: "Refrescos de referencia" },
+    { name: "Té Arizona", category: "Bebidas", price: "$39", image: "/images/bebidas-detalle.jpg", imageAlt: "Té Arizona de referencia" },
   ] satisfies MenuItem[],
   promotion: {
-    label: "Promoción del día",
-    title: "Hoy se antoja compartir.",
-    description: "Escríbenos para conocer la promoción vigente y armar tu pedido.",
+    label: "Promo de noviembre",
+    title: "Todo noviembre",
+    offer: "2x1*",
+    description: "En rollos, para que compartas más.",
+    footnote: "*Promoción válida en rollos seleccionados.",
   },
-  menuNote: "Descripciones tomadas de publicaciones de CAE Sushi. Confirma disponibilidad e ingredientes al ordenar.",
+  menuNote: "Imágenes de referencia. La presentación puede variar; confirma disponibilidad, ingredientes y precios al ordenar.",
   googleReviews: {
     rating: "4.6",
     count: 99,

@@ -1,64 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from "react";
+import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
 import Image from "next/image";
 import {
   AnimatePresence,
   motion,
-  useReducedMotion,
   type Variants,
 } from "framer-motion";
-import {
-  ArrowDown,
-  ArrowRight,
-  ArrowUpRight,
-  MapPin,
-  Menu,
-  Star,
-  X,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, Minus, Plus, X } from "lucide-react";
 import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
 import { getWhatsAppUrl, siteData, withBasePath } from "@/data/siteData";
-
-const navItems = [
-  { label: "Inicio", href: "#inicio" },
-  { label: "Nuestra carta", href: "#menu" },
-  { label: "Promoción", href: "#promocion" },
-  { label: "Opiniones", href: "#opiniones" },
-  { label: "¿Dónde le CAEs?", href: "#ubicacion" },
-];
-
-const slideEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
-const slideVariants: Variants = {
-  inactive: { opacity: 0.55, y: 10, filter: "blur(4px)" },
-  active: { opacity: 1, y: 0, filter: "blur(0px)" },
-};
-
-// El estado inicial depende solo de `active` para que SSR e hidratación coincidan.
-function useSlideFocus(active: boolean) {
-  const reduceMotion = useReducedMotion();
-  return {
-    variants: slideVariants,
-    initial: active ? "active" : "inactive",
-    animate: active ? "active" : "inactive",
-    transition: reduceMotion ? { duration: 0 } : { duration: 0.35, ease: slideEase },
-  };
-}
-
-function BrandMark() {
-  return (
-    <a className="brand" href="#inicio" aria-label="CAE Sushi, inicio">
-      <Image
-        className="brand-logo"
-        src={withBasePath(siteData.logo)}
-        alt="CAE Sushi"
-        width={2100}
-        height={1200}
-        priority
-      />
-    </a>
-  );
-}
 
 function SlideFooter({ showSocials = false }: { showSocials?: boolean }) {
   return (
@@ -79,134 +30,24 @@ function SlideFooter({ showSocials = false }: { showSocials?: boolean }) {
   );
 }
 
-function SiteHeader({
-  activeSection,
-  onNavigate,
-}: {
-  activeSection: string;
-  onNavigate: (sectionId: string) => void;
-}) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const reduceMotion = useReducedMotion();
-
-  function navigate(event: MouseEvent<HTMLAnchorElement>, href: string) {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    event.preventDefault();
-    onNavigate(href.slice(1));
-    setMenuOpen(false);
-  }
-
-  return (
-    <>
-      <header className="site-header">
-      <div className="header-inner container">
-        <BrandMark />
-        <nav className="desktop-nav" aria-label="Navegación principal">
-          {navItems.map((item) => {
-            const isActive = activeSection === item.href.slice(1);
-            return (
-              <a
-                key={item.href}
-                className={isActive ? "active" : undefined}
-                href={item.href}
-                aria-current={isActive ? "page" : undefined}
-                onClick={(event) => navigate(event, item.href)}
-              >
-                {item.label}
-              </a>
-            );
-          })}
-        </nav>
-        <a
-          className="header-order"
-          href={getWhatsAppUrl()}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <SiWhatsapp size={19} aria-hidden="true" />
-          <span>¡CAEle por WhatsApp!</span>
-          <ArrowUpRight size={15} aria-hidden="true" />
-        </a>
-        <button
-          className="mobile-menu-toggle"
-          type="button"
-          aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
-          aria-expanded={menuOpen}
-          aria-controls="mobile-navigation"
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          {menuOpen ? <X size={21} /> : <Menu size={21} />}
-        </button>
-      </div>
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.nav
-            id="mobile-navigation"
-            className="mobile-nav"
-            aria-label="Navegación móvil"
-            initial={reduceMotion ? false : { opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
-            transition={{ duration: reduceMotion ? 0 : 0.18 }}
-          >
-            {navItems.map((item) => {
-              const isActive = activeSection === item.href.slice(1);
-              return (
-                <a
-                  key={item.href}
-                  className={isActive ? "active" : undefined}
-                  href={item.href}
-                  aria-current={isActive ? "page" : undefined}
-                  onClick={(event) => navigate(event, item.href)}
-                >
-                  {item.label}
-                  <ArrowUpRight size={16} aria-hidden="true" />
-                </a>
-              );
-            })}
-            <a
-              className="mobile-order"
-              href={getWhatsAppUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <SiWhatsapp size={19} aria-hidden="true" />
-              ¡CAEle por WhatsApp!
-            </a>
-          </motion.nav>
-        )}
-      </AnimatePresence>
-    </header>
-    <AnimatePresence>
-      {!menuOpen && (
-        <motion.a
-          className="mobile-order-fab"
-          href={getWhatsAppUrl()}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Pedir por WhatsApp"
-          title="Pedir por WhatsApp"
-          tabIndex={0}
-          initial={false}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={reduceMotion ? undefined : { opacity: 0, scale: 0.85, y: 8 }}
-          transition={{ duration: reduceMotion ? 0 : 0.18 }}
-          whileTap={reduceMotion ? undefined : { scale: 0.94 }}
-        >
-          <SiWhatsapp size={25} aria-hidden="true" />
-        </motion.a>
-      )}
-      </AnimatePresence>
-    </>
-  );
-}
-
-function MenuSection({ active }: { active: boolean }) {
+function MenuSection() {
   const [activeCategory, setActiveCategory] = useState<(typeof siteData.menuCategories)[number]>(
     "Todos",
   );
-  const reduceMotion = useReducedMotion();
-  const slideFocus = useSlideFocus(active);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [orderOpen, setOrderOpen] = useState(false);
+  const [previewItem, setPreviewItem] = useState<(typeof siteData.menuItems)[number] | null>(null);
+  const [previewDirection, setPreviewDirection] = useState(0);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => setReduceMotion(mediaQuery.matches);
+    updatePreference();
+    mediaQuery.addEventListener("change", updatePreference);
+    return () => mediaQuery.removeEventListener("change", updatePreference);
+  }, []);
+
   const listVariants: Variants = {
     hidden: {},
     visible: {
@@ -221,10 +62,90 @@ function MenuSection({ active }: { active: boolean }) {
       transition: reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 25 },
     },
   };
-  const visibleItems =
-    activeCategory === "Todos"
-      ? siteData.menuItems
-      : siteData.menuItems.filter((item) => item.category === activeCategory);
+  const visibleCategories = siteData.menuCategories.filter(
+    (category) => category !== "Todos" && (activeCategory === "Todos" || category === activeCategory),
+  );
+
+  function getItemId(item: (typeof siteData.menuItems)[number]) {
+    return `${item.category}-${item.name}`;
+  }
+
+  const selectedItems = siteData.menuItems.filter((item) => quantities[getItemId(item)] > 0);
+  const orderCount = selectedItems.reduce((total, item) => total + quantities[getItemId(item)], 0);
+  const getUnitPrice = (item: (typeof siteData.menuItems)[number]) =>
+    Number(item.price.replace(/[^0-9]/g, ""));
+  const orderTotal = selectedItems.reduce(
+    (total, item) => total + getUnitPrice(item) * quantities[getItemId(item)],
+    0,
+  );
+  useEffect(() => {
+    if (selectedItems.length === 0) return;
+
+    const warnBeforeLeaving = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "Tu selección se perderá si actualizas o sales de la página.";
+    };
+
+    window.addEventListener("beforeunload", warnBeforeLeaving);
+    return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
+  }, [selectedItems.length]);
+
+  const orderMessage = selectedItems.length
+    ? [
+        "Hola, CAE. Quiero pedir para recoger:",
+        "",
+        ...selectedItems.map((item) => {
+          const quantity = quantities[getItemId(item)];
+          const subtotal = getUnitPrice(item) * quantity;
+          return `• ${quantity} × ${item.name} (${item.price} c/u) — $${subtotal}`;
+        }),
+        "",
+        `Total estimado: $${orderTotal} MXN`,
+        "¿Me confirman el total y a qué hora puedo pasar?",
+      ].join("\n")
+    : "";
+
+  function toggleItem(item: (typeof siteData.menuItems)[number]) {
+    const itemId = getItemId(item);
+    setQuantities((current) => {
+      const next = { ...current };
+      if (next[itemId]) delete next[itemId];
+      else next[itemId] = 1;
+      return next;
+    });
+  }
+
+  function changeQuantity(item: (typeof siteData.menuItems)[number], amount: number) {
+    const itemId = getItemId(item);
+    if (orderOpen && amount < 0 && selectedItems.length === 1 && quantities[itemId] === 1) {
+      setOrderOpen(false);
+    }
+    setQuantities((current) => {
+      const nextQuantity = Math.max(0, Math.min(20, (current[itemId] || 0) + amount));
+      const next = { ...current };
+      if (nextQuantity === 0) delete next[itemId];
+      else next[itemId] = nextQuantity;
+      return next;
+    });
+  }
+
+  function getItemSummary(item: (typeof siteData.menuItems)[number]) {
+    return item.description || item.topping || [item.inside, item.outside].filter(Boolean).join(" · ");
+  }
+
+  const previewItems = siteData.menuItems.filter(
+    (item) => activeCategory === "Todos" || item.category === activeCategory,
+  );
+  const previewIndex = previewItem
+    ? previewItems.findIndex((item) => getItemId(item) === getItemId(previewItem))
+    : -1;
+
+  function movePreview(direction: number) {
+    if (!previewItem || previewItems.length < 2) return;
+    const nextIndex = (previewIndex + direction + previewItems.length) % previewItems.length;
+    setPreviewDirection(direction);
+    setPreviewItem(previewItems[nextIndex]);
+  }
 
   function setSpotlight(event: MouseEvent<HTMLElement>) {
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -236,18 +157,19 @@ function MenuSection({ active }: { active: boolean }) {
   }
 
   return (
-    <motion.section className="menu-section section-space story-slide" id="menu" {...slideFocus}>
+    <section className="menu-section section-space" id="menu">
       <div className="container">
         <div className="section-heading menu-heading">
           <div>
-            <p className="eyebrow"><span /> Fresco, hecho al momento</p>
-            <h2>Una carta para<br /><em>comer a lo culichi.</em></h2>
+            <p className="eyebrow"><span /> Precios en MXN</p>
+            <h2>Menú</h2>
           </div>
           <p className="section-intro">
-            Rollos bien servidos, sabores intensos y el sazón culichi de CAE, preparados al momento para hacerle caso al antojo.
+            Elige una categoría o recorre la carta completa de CAE Sushi.
           </p>
         </div>
 
+        <div className="menu-browser">
         <div className="menu-toolbar">
           <div className="category-tabs" role="tablist" aria-label="Filtrar menú por categoría">
             {siteData.menuCategories.map((category) => (
@@ -260,13 +182,7 @@ function MenuSection({ active }: { active: boolean }) {
                 onClick={() => setActiveCategory(category)}
               >
                 {category}
-                {activeCategory === category && (
-                  <motion.span
-                    className="tab-indicator"
-                    layoutId="tab-indicator"
-                    transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 25 }}
-                  />
-                )}
+                {activeCategory === category && <span className="tab-indicator" />}
               </button>
             ))}
           </div>
@@ -274,51 +190,324 @@ function MenuSection({ active }: { active: boolean }) {
 
         <AnimatePresence mode="wait">
           <motion.div
-            className="menu-grid"
+            className="menu-groups"
             variants={listVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
             key={activeCategory}
           >
-            {visibleItems.map((item, index) => (
-              <motion.article
-                key={item.name}
-                className={`menu-card${index === 0 && activeCategory === "Todos" ? " menu-card-featured" : ""}`}
-                variants={cardVariants}
-                whileHover={reduceMotion ? undefined : { y: -4 }}
-                onMouseMove={setSpotlight}
-                style={{ "--card-image": `url("${withBasePath(item.image)}")` } as CSSProperties}
-              >
-                <div className="menu-image" role="img" aria-label={item.imageAlt}>
-                  {item.tag && <span className="menu-tag">{item.tag}</span>}
-                  <span className="menu-image-index">0{index + 1}</span>
-                </div>
-                <div className="menu-card-copy">
-                  <div className="menu-card-title-row">
-                    <div>
-                      <span className="menu-category-label">{item.category}</span>
-                      <h3>{item.name}</h3>
-                    </div>
+            {visibleCategories.map((category) => {
+              const items = siteData.menuItems.filter((item) => item.category === category);
+              return (
+                <motion.section className="menu-group" key={category} variants={cardVariants}>
+                  <div className="menu-group-heading">
+                    <h3>{category}</h3>
+                    <span>{items.length} productos</span>
                   </div>
-                  <p>{item.description}</p>
-                </div>
-              </motion.article>
-            ))}
+                  <div className="menu-grid">
+                    {items.map((item) => {
+                      const itemId = getItemId(item);
+                      const quantity = quantities[itemId] || 0;
+                      const isSelected = quantity > 0;
+                      return (
+                      <motion.article
+                        key={itemId}
+                        className={isSelected ? "menu-card selected" : "menu-card"}
+                        variants={cardVariants}
+                        whileHover={reduceMotion ? undefined : { y: -3 }}
+                        onMouseMove={setSpotlight}
+                        style={{ "--card-image": `url("${withBasePath(item.image)}")` } as CSSProperties}
+                      >
+                        <label className="menu-select" title={`Seleccionar ${item.name}`}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleItem(item)}
+                            aria-label={`Agregar ${item.name} al pedido`}
+                          />
+                          <span aria-hidden="true" />
+                        </label>
+                        <button
+                          className="menu-image"
+                          type="button"
+                          onClick={() => {
+                            setPreviewDirection(0);
+                            setPreviewItem(item);
+                          }}
+                          aria-label={`Ver detalles de ${item.name}`}
+                          style={{ "--card-image": `url("${withBasePath(item.image)}")` } as CSSProperties}
+                        />
+                        <div className="menu-card-copy">
+                          <div className="menu-card-title-row">
+                            <h4>{item.name}</h4>
+                          </div>
+                          <p className="menu-summary">{getItemSummary(item)}</p>
+                          <div className="menu-card-meta">
+                            {isSelected ? (
+                              <span className="menu-selected-copy">{quantity} en tu pedido</span>
+                            ) : item.tag ? <span className="menu-tag">{item.tag}</span> : <span />}
+                            <span className="menu-price">{item.price}</span>
+                          </div>
+                        </div>
+                      </motion.article>
+                      );
+                    })}
+                  </div>
+                </motion.section>
+              );
+            })}
           </motion.div>
         </AnimatePresence>
-        <p className="data-note">{siteData.menuNote}</p>
+        <div className="menu-bottom-row">
+          <p className="data-note">{siteData.menuNote}</p>
+        </div>
+        </div>
       </div>
-      <SlideFooter />
-    </motion.section>
+      <AnimatePresence>
+        {selectedItems.length > 0 && !previewItem && !orderOpen && (
+          <motion.button
+            className="order-fab button button-primary"
+            type="button"
+            onClick={() => setOrderOpen(true)}
+            initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={reduceMotion ? undefined : { opacity: 0, y: 18, scale: 0.96 }}
+            transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 25 }}
+          >
+            <SiWhatsapp size={19} aria-hidden="true" />
+            <span>Revisar pedido</span>
+            <span className="order-count" aria-label={`${orderCount} productos seleccionados`}>
+              {orderCount}
+            </span>
+          </motion.button>
+        )}
+        {previewItem && (
+          <motion.div
+            className="product-preview-backdrop"
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduceMotion ? undefined : { opacity: 0 }}
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setPreviewItem(null);
+            }}
+          >
+            <motion.div
+              className="product-preview"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="product-preview-title"
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setPreviewItem(null);
+              }}
+              tabIndex={-1}
+              initial={reduceMotion ? false : { opacity: 0, y: 24, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reduceMotion ? undefined : { opacity: 0, y: 24, scale: 0.98 }}
+              transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 25 }}
+            >
+              <button
+                className="product-preview-close"
+                type="button"
+                onClick={() => setPreviewItem(null)}
+                aria-label="Cerrar vista del producto"
+              >
+                <X size={21} aria-hidden="true" />
+              </button>
+              <button
+                className="product-preview-nav product-preview-nav-previous"
+                type="button"
+                onClick={() => movePreview(-1)}
+                aria-label="Ver producto anterior"
+              >
+                <ArrowLeft size={20} aria-hidden="true" />
+              </button>
+              <button
+                className="product-preview-nav product-preview-nav-next"
+                type="button"
+                onClick={() => movePreview(1)}
+                aria-label="Ver producto siguiente"
+              >
+                <ArrowRight size={20} aria-hidden="true" />
+              </button>
+              <span className="product-preview-position" aria-live="polite">
+                {previewIndex + 1} / {previewItems.length}
+              </span>
+              {selectedItems.length > 0 && (
+                <button
+                  className="preview-order-fab"
+                  type="button"
+                  onClick={() => {
+                    setPreviewItem(null);
+                    setOrderOpen(true);
+                  }}
+                  aria-label={`Revisar pedido con ${orderCount} productos`}
+                >
+                  <SiWhatsapp size={21} aria-hidden="true" />
+                  <span>{orderCount}</span>
+                </button>
+              )}
+              <AnimatePresence mode="wait" custom={previewDirection}>
+                <motion.div
+                  className="product-preview-slide"
+                  key={getItemId(previewItem)}
+                  custom={previewDirection}
+                  variants={{
+                    enter: (direction: number) => ({ opacity: 0, x: direction === 0 ? 0 : direction * 72 }),
+                    center: { opacity: 1, x: 0 },
+                    exit: (direction: number) => ({ opacity: 0, x: direction === 0 ? 0 : direction * -72 }),
+                  }}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 28 }}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.16}
+                  onDragEnd={(_, info) => {
+                    if (info.offset.x < -60) movePreview(1);
+                    else if (info.offset.x > 60) movePreview(-1);
+                  }}
+                >
+                  <div className="product-preview-stage">
+                    <div
+                      className="product-preview-image"
+                      role="img"
+                      aria-label={previewItem.imageAlt}
+                      style={{ "--preview-image": `url("${withBasePath(previewItem.image)}")` } as CSSProperties}
+                    />
+                  </div>
+                  <div className="product-preview-copy">
+                    <span className="product-preview-category">{previewItem.category}</span>
+                    <div className="product-preview-title-row">
+                      <h2 id="product-preview-title">{previewItem.name}</h2>
+                      <strong>{previewItem.price}</strong>
+                    </div>
+                    {previewItem.description && <p className="product-preview-description">{previewItem.description}</p>}
+                    <div className="product-preview-details">
+                      {previewItem.inside && <p><strong>Por dentro</strong><span>{previewItem.inside}</span></p>}
+                      {previewItem.outside && <p><strong>Por fuera</strong><span>{previewItem.outside}</span></p>}
+                      {previewItem.topping && <p><strong>Topping / terminado</strong><span>{previewItem.topping}</span></p>}
+                    </div>
+                    {previewItem.tag && <span className="product-preview-tag">{previewItem.tag}</span>}
+                    <div className="product-preview-order">
+                      {quantities[getItemId(previewItem)] > 0 ? (
+                        <>
+                          <span>Cantidad en tu pedido</span>
+                          <div className="quantity-control quantity-control-large">
+                            <button
+                              type="button"
+                              onClick={() => changeQuantity(previewItem, -1)}
+                              aria-label={`Quitar uno de ${previewItem.name}`}
+                            >
+                              <Minus size={17} aria-hidden="true" />
+                            </button>
+                            <span aria-live="polite">{quantities[getItemId(previewItem)]}</span>
+                            <button
+                              type="button"
+                              onClick={() => changeQuantity(previewItem, 1)}
+                              aria-label={`Agregar uno más de ${previewItem.name}`}
+                            >
+                              <Plus size={17} aria-hidden="true" />
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <button className="button button-primary" type="button" onClick={() => toggleItem(previewItem)}>
+                          Agregar a mi pedido
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
+          </motion.div>
+        )}
+        {orderOpen && selectedItems.length > 0 && (
+          <motion.div
+            className="order-modal-backdrop"
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduceMotion ? undefined : { opacity: 0 }}
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setOrderOpen(false);
+            }}
+          >
+            <motion.div
+              className="order-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="order-modal-title"
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setOrderOpen(false);
+              }}
+              tabIndex={-1}
+              initial={reduceMotion ? false : { opacity: 0, y: 24, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={reduceMotion ? undefined : { opacity: 0, y: 24, scale: 0.98 }}
+              transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 25 }}
+            >
+              <div className="order-modal-heading">
+                <div>
+                  <span>Pedido para recoger</span>
+                  <h2 id="order-modal-title">Revisa tu pedido</h2>
+                </div>
+                <button type="button" onClick={() => setOrderOpen(false)} aria-label="Cerrar resumen del pedido">
+                  <X size={20} aria-hidden="true" />
+                </button>
+              </div>
+              <div className="order-lines">
+                {selectedItems.map((item) => {
+                  const itemId = getItemId(item);
+                  const quantity = quantities[itemId];
+                  return (
+                    <div className="order-line" key={itemId}>
+                      <div>
+                        <strong>{item.name}</strong>
+                        <span>{item.price} c/u</span>
+                      </div>
+                      <div className="order-line-controls">
+                        <div className="quantity-control">
+                          <button type="button" onClick={() => changeQuantity(item, -1)} aria-label={`Quitar uno de ${item.name}`}>
+                            <Minus size={14} aria-hidden="true" />
+                          </button>
+                          <span>{quantity}</span>
+                          <button type="button" onClick={() => changeQuantity(item, 1)} aria-label={`Agregar uno más de ${item.name}`}>
+                            <Plus size={14} aria-hidden="true" />
+                          </button>
+                        </div>
+                        <strong>${getUnitPrice(item) * quantity}</strong>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="order-total">
+                <span>Total estimado</span>
+                <strong>${orderTotal} MXN</strong>
+              </div>
+              <p className="order-note">El restaurante confirmará disponibilidad y total final.</p>
+              <a
+                className="button button-primary order-confirm"
+                href={getWhatsAppUrl(orderMessage)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <SiWhatsapp size={19} aria-hidden="true" />
+                Confirmar por WhatsApp
+              </a>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
   );
 }
 
-function PromotionSection({ active }: { active: boolean }) {
-  const slideFocus = useSlideFocus(active);
-
+function PromotionSection() {
   return (
-    <motion.section className="promotion-section section-space story-slide" id="promocion" {...slideFocus}>
+    <section className="promotion-section section-space" id="promocion">
       <div className="container">
         <div className="promotion-panel">
           <div
@@ -327,72 +516,26 @@ function PromotionSection({ active }: { active: boolean }) {
             style={{ "--promotion-image": `url("${withBasePath(siteData.promotionImage)}")` } as CSSProperties}
           >
             <div className="promotion-photo" />
-            <span className="promotion-stamp">CAE<br />SUSHI</span>
           </div>
           <div className="promotion-copy">
             <p className="eyebrow eyebrow-light"><span /> {siteData.promotion.label}</p>
             <h2>{siteData.promotion.title}</h2>
+            <strong className="promotion-offer">{siteData.promotion.offer}</strong>
             <p>{siteData.promotion.description}</p>
-            <span className="promotion-footnote">La promoción vigente se confirma directamente con el restaurante.</span>
+            <span className="promotion-footnote">{siteData.promotion.footnote}</span>
           </div>
         </div>
       </div>
-      <SlideFooter />
-    </motion.section>
+    </section>
   );
 }
 
-function ReviewsSection({ active }: { active: boolean }) {
-  const slideFocus = useSlideFocus(active);
-
-  return (
-    <motion.section className="reviews-section section-space story-slide" id="opiniones" {...slideFocus}>
-      <div className="container">
-        <div className="reviews-heading">
-          <div>
-            <p className="eyebrow"><span /> Lo que cuentan en Google</p>
-            <h2>Buen sushi.<br /><em>Buena compañía.</em></h2>
-          </div>
-          <a className="google-rating" href={siteData.googleReviews.url} target="_blank" rel="noopener noreferrer">
-            <span className="rating-score">{siteData.googleReviews.rating}</span>
-            <span className="rating-detail">
-              <span className="rating-stars" aria-label={`${siteData.googleReviews.rating} de 5 estrellas`}>
-                {Array.from({ length: 5 }, (_, index) => <Star key={index} size={15} fill="currentColor" aria-hidden="true" />)}
-              </span>
-              <span>Google · {siteData.googleReviews.count} opiniones</span>
-            </span>
-            <ArrowUpRight size={17} aria-hidden="true" />
-          </a>
-        </div>
-        <div className="review-grid">
-          {siteData.googleReviews.excerpts.map((review, index) => (
-            <article className="review-card" key={index}>
-              <div className="review-stars" aria-label="5 de 5 estrellas">
-                {Array.from({ length: 5 }, (_, index) => <Star key={index} size={13} fill="currentColor" aria-hidden="true" />)}
-              </div>
-              <blockquote>“{review.quote}”</blockquote>
-              <div className="review-author">
-                <span>{review.date} · Google</span>
-              </div>
-            </article>
-          ))}
-        </div>
-        <a className="text-link all-reviews-link" href={siteData.googleReviews.url} target="_blank" rel="noopener noreferrer">
-          Leer opiniones en Google <ArrowUpRight size={16} aria-hidden="true" />
-        </a>
-      </div>
-      <SlideFooter />
-    </motion.section>
-  );
-}
-
-function LocationSection({ active }: { active: boolean }) {
-  const slideFocus = useSlideFocus(active);
+function LocationSection() {
   const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(siteData.address)}&output=embed`;
   const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(siteData.address)}`;
 
   return (
-    <motion.section className="location-section section-space story-slide" id="ubicacion" {...slideFocus}>
+    <section className="location-section section-space" id="ubicacion">
       <div className="container location-layout">
         <div className="location-copy">
           <p className="eyebrow"><span /> ¿Dónde le CAEs?</p>
@@ -406,7 +549,7 @@ function LocationSection({ active }: { active: boolean }) {
             </div>
           </div>
           <a className="button button-primary" href={directionsUrl} target="_blank" rel="noopener noreferrer">
-            Cómo llegar <ArrowUpRight size={17} aria-hidden="true" />
+            Cómo llegar
           </a>
         </div>
         <div className="map-frame">
@@ -423,127 +566,43 @@ function LocationSection({ active }: { active: boolean }) {
           </a>
         </div>
       </div>
-      <SlideFooter showSocials />
-    </motion.section>
+    </section>
   );
 }
 
 export function SiteExperience() {
-  const [activeSection, setActiveSection] = useState("inicio");
-  const navigationTarget = useRef<string | null>(null);
-  const reduceMotion = useReducedMotion();
-  const heroFocus = useSlideFocus(activeSection === "inicio");
-
-  useEffect(() => {
-    const deck = document.querySelector<HTMLElement>(".story-deck");
-    if (!deck) return;
-
-    const slides = Array.from(deck.querySelectorAll<HTMLElement>(".story-slide"));
-    let frame = 0;
-    let settleTimer = 0;
-    const updateActiveSection = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const deckCenter = deck.getBoundingClientRect().left + deck.clientWidth / 2;
-        const activeSlide = slides.reduce((closest, slide) => {
-          const closestDistance = Math.abs(
-            closest.getBoundingClientRect().left + closest.clientWidth / 2 - deckCenter,
-          );
-          const slideDistance = Math.abs(
-            slide.getBoundingClientRect().left + slide.clientWidth / 2 - deckCenter,
-          );
-          return slideDistance < closestDistance ? slide : closest;
-        });
-        if (navigationTarget.current && navigationTarget.current !== activeSlide.id) return;
-        navigationTarget.current = null;
-        setActiveSection(activeSlide.id);
-      });
-    };
-    const handleDeckScroll = () => {
-      updateActiveSection();
-      if (!navigationTarget.current) return;
-
-      window.clearTimeout(settleTimer);
-      settleTimer = window.setTimeout(() => {
-        navigationTarget.current = null;
-        updateActiveSection();
-      }, 180);
-    };
-
-    deck.addEventListener("scroll", handleDeckScroll, { passive: true });
-    window.addEventListener("resize", updateActiveSection);
-    updateActiveSection();
-    return () => {
-      deck.removeEventListener("scroll", handleDeckScroll);
-      window.removeEventListener("resize", updateActiveSection);
-      cancelAnimationFrame(frame);
-      window.clearTimeout(settleTimer);
-    };
-  }, []);
-
-  function handleDeckKeyDown(event: KeyboardEvent<HTMLElement>) {
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-    if ((event.target as HTMLElement).closest("a, button, input, textarea, select")) return;
-
-    const slides = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(".story-slide"));
-    const currentIndex = slides.findIndex((slide) => slide.id === activeSection);
-    const nextIndex = currentIndex + (event.key === "ArrowRight" ? 1 : -1);
-    if (!slides[nextIndex]) return;
-
-    event.preventDefault();
-    event.currentTarget.scrollTo({
-      left: event.currentTarget.scrollLeft + event.currentTarget.clientWidth * (nextIndex - currentIndex),
-      behavior: reduceMotion ? "auto" : "smooth",
-    });
-  }
-
-  function navigateToSection(sectionId: string) {
-    const deck = document.querySelector<HTMLElement>(".story-deck");
-    const section = document.getElementById(sectionId);
-    if (!deck || !section) return;
-
-    navigationTarget.current = sectionId;
-    setActiveSection(sectionId);
-    history.replaceState(null, "", `#${sectionId}`);
-    const offset = section.getBoundingClientRect().left - deck.getBoundingClientRect().left;
-    deck.scrollTo({
-      left: deck.scrollLeft + offset,
-      behavior: reduceMotion ? "auto" : "smooth",
-    });
-  }
-
   return (
-    <>
-      <SiteHeader activeSection={activeSection} onNavigate={navigateToSection} />
-      <main
-        className="story-deck"
-        tabIndex={0}
-        aria-label="Secciones del sitio. Usa las flechas izquierda y derecha para cambiar de sección."
-        onKeyDown={handleDeckKeyDown}
-      >
-        <motion.section className="hero-section story-slide" id="inicio" {...heroFocus}>
-          <div className="hero-pattern" aria-hidden="true" />
+    <main className="site-content">
+        <section
+          className="hero-section"
+          id="inicio"
+          style={{ "--hero-background": `url("${withBasePath(siteData.heroImage)}")` } as CSSProperties}
+        >
+          <a className="hero-logo" href="#inicio" aria-label="CAE Sushi, inicio">
+            <Image
+              src={withBasePath(siteData.logo)}
+              alt="CAE Sushi"
+              width={2100}
+              height={1200}
+              priority
+            />
+          </a>
           <div className="container hero-layout">
             <div className="hero-copy">
               <p className="eyebrow"><span /> Sushi estilo culichi · Cholula</p>
-              <h1>¿Antojo de sushi?<br /><em>¡CAEle por el tuyo!</em></h1>
-              <p className="hero-description">Sushi preparado al momento, con el sazón culichi y el toque de CAE para que cada antojo valga la vuelta.</p>
+              <h1>Rollos de Sushi<br /><em>que sí llenan</em></h1>
               <div className="hero-actions">
-                <a className="button button-primary" href="#menu">Explorar la carta <ArrowDown size={16} aria-hidden="true" /></a>
+                <a className="button button-primary" href="#menu">Ver menú</a>
+                <a
+                  className="button button-whatsapp"
+                  href={getWhatsAppUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <SiWhatsapp size={18} aria-hidden="true" />
+                  Pedir para recoger
+                </a>
               </div>
-            </div>
-            <div className="hero-visual">
-              <div
-                className="hero-photo"
-                role="img"
-                aria-label="Sushi fresco preparado para compartir"
-                style={{ "--hero-image": `url("${withBasePath(siteData.heroImage)}")` } as CSSProperties}
-              />
-              <div className="hero-photo-caption">
-                <span>Crujiente por fuera, brutal por dentro.</span>
-                <span>CAE / 01</span>
-              </div>
-              <div className="hero-side-note">FRESCO<br />& HECHO<br />AL MOMENTO</div>
             </div>
           </div>
           <div className="hero-bottom container">
@@ -551,14 +610,12 @@ export function SiteExperience() {
             <span className="hero-bottom-rule" />
             <span>San Andrés Cholula, Pue.</span>
           </div>
-          <SlideFooter />
-        </motion.section>
+        </section>
 
-        <MenuSection active={activeSection === "menu"} />
-        <PromotionSection active={activeSection === "promocion"} />
-        <ReviewsSection active={activeSection === "opiniones"} />
-        <LocationSection active={activeSection === "ubicacion"} />
+        <MenuSection />
+        <PromotionSection />
+        <LocationSection />
+        <SlideFooter showSocials />
       </main>
-    </>
   );
 }
