@@ -7,9 +7,64 @@ import {
   motion,
   type Variants,
 } from "framer-motion";
-import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, Minus, Plus, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, Menu, Minus, Plus, X } from "lucide-react";
 import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
 import { getWhatsAppUrl, siteData, withBasePath } from "@/data/siteData";
+
+const navItems = [
+  { label: "Inicio", href: "#inicio" },
+  { label: "Menú", href: "#menu" },
+  { label: "Promos", href: "#promocion" },
+  { label: "Quiénes somos", href: "#quienes-somos" },
+  { label: "Ubicación", href: "#ubicacion" },
+];
+
+function SiteNavigation() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <>
+      <header className="site-header">
+        <div className="header-inner container">
+          <nav className="desktop-nav" aria-label="Navegación principal">
+            {navItems.map((item) => (
+              <a key={item.href} href={item.href}>{item.label}</a>
+            ))}
+          </nav>
+          <button
+            className="mobile-menu-toggle"
+            type="button"
+            aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.nav
+              id="mobile-navigation"
+              className="mobile-nav"
+              aria-label="Navegación móvil"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
+            >
+              {navItems.map((item) => (
+                <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>
+                  {item.label}
+                </a>
+              ))}
+            </motion.nav>
+          )}
+        </AnimatePresence>
+      </header>
+    </>
+  );
+}
 
 function SlideFooter({ showSocials = false }: { showSocials?: boolean }) {
   return (
@@ -165,7 +220,7 @@ function MenuSection() {
             <h2>Menú</h2>
           </div>
           <p className="section-intro">
-            Elige una categoría o recorre la carta completa de CAE Sushi.
+            Elige una categoría y elige el que más se te antoje
           </p>
         </div>
 
@@ -276,7 +331,7 @@ function MenuSection() {
             transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 25 }}
           >
             <SiWhatsapp size={19} aria-hidden="true" />
-            <span>Revisar pedido</span>
+            <span className="order-fab-label">Revisar pedido</span>
             <span className="order-count" aria-label={`${orderCount} productos seleccionados`}>
               {orderCount}
             </span>
@@ -330,9 +385,6 @@ function MenuSection() {
               >
                 <ArrowRight size={20} aria-hidden="true" />
               </button>
-              <span className="product-preview-position" aria-live="polite">
-                {previewIndex + 1} / {previewItems.length}
-              </span>
               {selectedItems.length > 0 && (
                 <button
                   className="preview-order-fab"
@@ -518,11 +570,41 @@ function PromotionSection() {
             <div className="promotion-photo" />
           </div>
           <div className="promotion-copy">
-            <p className="eyebrow eyebrow-light"><span /> {siteData.promotion.label}</p>
+            <p className="eyebrow"><span /> {siteData.promotion.label}</p>
             <h2>{siteData.promotion.title}</h2>
             <strong className="promotion-offer">{siteData.promotion.offer}</strong>
             <p>{siteData.promotion.description}</p>
             <span className="promotion-footnote">{siteData.promotion.footnote}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AboutSection() {
+  return (
+    <section className="about-section section-space" id="quienes-somos">
+      <div className="container">
+        <div className="about-panel">
+          <div className="about-heading">
+            <p className="eyebrow"><span /> La historia de CAE</p>
+            <h2>Quiénes somos</h2>
+          </div>
+          <div className="about-grid">
+            <div className="about-copy">
+              <h3>Más de ocho años<br />preparando sushi</h3>
+              <p>Llevamos más de 8 años preparando sushi. En CAE nacimos con un sabor y un estilo culichi, cada rollo tiene su propia sazón y queremos que cada visita se sienta como estar entre amigos.</p>
+              <p className="about-copy-full">Los hacemos al momento y los servimos bien. Nuestro objetivo es que pruebes algo diferente, con sabor, con cariño y con el toque de CAE. Puedes venir solo, con tu familia o con amigos; siempre hay un rollo esperando para ti.</p>
+              <p className="about-copy-mobile">Rollo por rollo, servimos sushi al momento con sazón culichi, ingredientes frescos y la atención de casa.</p>
+              <a className="button button-primary" href="#menu">Ver menú</a>
+            </div>
+            <div
+              className="about-photo"
+              role="img"
+              aria-label="Restaurante y equipo de CAE Sushi"
+              style={{ "--about-image": `url("${withBasePath(siteData.aboutImage)}")` } as CSSProperties}
+            />
           </div>
         </div>
       </div>
@@ -536,23 +618,34 @@ function LocationSection() {
 
   return (
     <section className="location-section section-space" id="ubicacion">
-      <div className="container location-layout">
-        <div className="location-copy">
-          <p className="eyebrow"><span /> ¿Dónde le CAEs?</p>
-          <h2>Un toque del norte<br /><em>en Cholula.</em></h2>
-          <p className="location-intro">El sazón del norte encontró su lugar en Cholula. Pasa por tu pedido o escríbenos antes de venir.</p>
-          <div className="address-block">
-            <span className="address-icon"><MapPin size={19} aria-hidden="true" /></span>
-            <div>
-              <span className="address-label">CAE Sushi · Cholula</span>
-              <address>{siteData.address}</address>
+      <div className="container">
+        <div className="location-panel">
+          <div className="location-copy">
+            <p className="eyebrow"><span /> Visítanos</p>
+            <h2>Ubicación y horarios</h2>
+            <address className="location-address">{siteData.address}</address>
+            <div className="hours-block">
+              <h3>Horarios</h3>
+              <strong>1:00 a 10:00 p. m.</strong>
+              <p>Miércoles cerrado</p>
             </div>
+            <h3 className="contact-heading">Contacto</h3>
+            <a className="location-phone" href={`tel:${siteData.phone.replace(/\s/g, "")}`}>
+              {siteData.phoneDisplay}
+            </a>
+            <div className="location-socials" aria-label="Redes sociales">
+              <a href={siteData.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="CAE Sushi en Facebook">
+                <SiFacebook size={18} aria-hidden="true" />
+              </a>
+              <a href={siteData.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="CAE Sushi en Instagram">
+                <SiInstagram size={19} aria-hidden="true" />
+              </a>
+            </div>
+            <a className="button button-primary" href={directionsUrl} target="_blank" rel="noopener noreferrer">
+              Abrir en Google Maps
+            </a>
           </div>
-          <a className="button button-primary" href={directionsUrl} target="_blank" rel="noopener noreferrer">
-            Cómo llegar
-          </a>
-        </div>
-        <div className="map-frame">
+          <div className="map-frame">
           <iframe
             title="Ubicación de CAE Sushi en San Andrés Cholula"
             src={mapUrl}
@@ -564,6 +657,7 @@ function LocationSection() {
             <span><MapPin size={16} aria-hidden="true" /> San Andrés Cholula, Puebla</span>
             <ArrowUpRight size={16} aria-hidden="true" />
           </a>
+          </div>
         </div>
       </div>
     </section>
@@ -578,6 +672,7 @@ export function SiteExperience() {
           id="inicio"
           style={{ "--hero-background": `url("${withBasePath(siteData.heroImage)}")` } as CSSProperties}
         >
+          <SiteNavigation />
           <a className="hero-logo" href="#inicio" aria-label="CAE Sushi, inicio">
             <Image
               src={withBasePath(siteData.logo)}
@@ -614,8 +709,9 @@ export function SiteExperience() {
 
         <MenuSection />
         <PromotionSection />
+        <AboutSection />
         <LocationSection />
-        <SlideFooter showSocials />
+        <SlideFooter />
       </main>
   );
 }
