@@ -32,13 +32,13 @@ export const siteData = {
   openingHoursSpecification: [
     {
       dayOfWeek: ["Monday", "Tuesday", "Thursday", "Friday", "Saturday"],
-      opens: "13:00",
+      opens: "14:00",
       closes: "22:00",
     },
     {
-      dayOfWeek: ["Saturday", "Sunday"],
+      dayOfWeek: ["Sunday"],
       opens: "13:00",
-      closes: "22:00",
+      closes: "20:00",
     },
   ],
   instagramUrl: "https://www.instagram.com/cae_sushi/",
@@ -60,12 +60,11 @@ export const siteData = {
     addressCountry: "MX",
   },
   menuCategories: [
-    "Todos",
+    "Entradas",
+    "Arroces",
     "Rollos naturales",
     "Rollos empanizados",
     "Rollos horneados",
-    "Entradas",
-    "Arroces",
     "Bebidas",
   ] as const,
   menuItems: [

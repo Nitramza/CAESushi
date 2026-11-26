@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type TouchEvent } from "react";
 import Image from "next/image";
+import { createPortal } from "react-dom";
 import {
   AnimatePresence,
   motion,
   type Variants,
 } from "framer-motion";
-import { ArrowLeft, ArrowRight, ArrowUpRight, MapPin, Menu, Minus, Plus, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Menu, Minus, Plus, X } from "lucide-react";
 import { SiFacebook, SiInstagram, SiWhatsapp } from "react-icons/si";
 import { getWhatsAppUrl, siteData, withBasePath } from "@/data/siteData";
 
@@ -17,52 +18,87 @@ const navItems = [
   { label: "Promos", href: "#promocion" },
   { label: "Quiénes somos", href: "#quienes-somos" },
   { label: "Ubicación", href: "#ubicacion" },
-];
+] as const;
 
-function SiteNavigation() {
+type SlideId = (typeof navItems)[number]["href"];
+
+function SiteNavigation({
+  activeSlide,
+  onNavigate,
+}: {
+  activeSlide: SlideId;
+  onNavigate: (slide: SlideId) => void;
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  function navigate(event: React.MouseEvent<HTMLAnchorElement>, slide: SlideId) {
+    event.preventDefault();
+    onNavigate(slide);
+    setMenuOpen(false);
+  }
+
   return (
-    <>
-      <header className="site-header">
-        <div className="header-inner container">
-          <nav className="desktop-nav" aria-label="Navegación principal">
-            {navItems.map((item) => (
-              <a key={item.href} href={item.href}>{item.label}</a>
-            ))}
-          </nav>
-          <button
-            className="mobile-menu-toggle"
-            type="button"
-            aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-navigation"
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            {menuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-        </div>
-        <AnimatePresence>
-          {menuOpen && (
-            <motion.nav
-              id="mobile-navigation"
-              className="mobile-nav"
-              aria-label="Navegación móvil"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.18 }}
+    <header className="site-header">
+      <div className="header-inner container">
+        <a className="header-logo" href="#inicio" onClick={(event) => navigate(event, "#inicio")} aria-label="CAE Sushi, inicio">
+          <Image
+            src={withBasePath(siteData.logo)}
+            alt="CAE Sushi"
+            width={2100}
+            height={1200}
+            priority
+          />
+        </a>
+        <nav className="desktop-nav" aria-label="Navegación principal">
+          {navItems.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              className={activeSlide === item.href ? "active" : undefined}
+              aria-current={activeSlide === item.href ? "page" : undefined}
+              onClick={(event) => navigate(event, item.href)}
             >
-              {navItems.map((item) => (
-                <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>
-                  {item.label}
-                </a>
-              ))}
-            </motion.nav>
-          )}
-        </AnimatePresence>
-      </header>
-    </>
+              {item.label}
+            </a>
+          ))}
+        </nav>
+        <button
+          className="mobile-menu-toggle"
+          type="button"
+          aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-navigation"
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+      </div>
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.nav
+            id="mobile-navigation"
+            className="mobile-nav"
+            aria-label="Navegación móvil"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+          >
+            {navItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={activeSlide === item.href ? "active" : undefined}
+                aria-current={activeSlide === item.href ? "page" : undefined}
+                onClick={(event) => navigate(event, item.href)}
+              >
+                {item.label}
+              </a>
+            ))}
+          </motion.nav>
+        )}
+      </AnimatePresence>
+    </header>
   );
 }
 
@@ -87,8 +123,10 @@ function SlideFooter({ showSocials = false }: { showSocials?: boolean }) {
 
 function MenuSection() {
   const [activeCategory, setActiveCategory] = useState<(typeof siteData.menuCategories)[number]>(
-    "Todos",
+    "Entradas",
   );
+  const [expandedCategory, setExpandedCategory] = useState(false);
+  const [compactItemCount, setCompactItemCount] = useState(3);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [orderOpen, setOrderOpen] = useState(false);
   const [previewItem, setPreviewItem] = useState<(typeof siteData.menuItems)[number] | null>(null);
@@ -101,6 +139,15 @@ function MenuSection() {
     updatePreference();
     mediaQuery.addEventListener("change", updatePreference);
     return () => mediaQuery.removeEventListener("change", updatePreference);
+  }, []);
+
+  useEffect(() => {
+    const updateCompactCount = () => {
+      setCompactItemCount(window.innerWidth >= 1800 ? 5 : window.innerWidth >= 1400 ? 4 : 3);
+    };
+    updateCompactCount();
+    window.addEventListener("resize", updateCompactCount);
+    return () => window.removeEventListener("resize", updateCompactCount);
   }, []);
 
   const listVariants: Variants = {
@@ -117,9 +164,33 @@ function MenuSection() {
       transition: reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 25 },
     },
   };
-  const visibleCategories = siteData.menuCategories.filter(
-    (category) => category !== "Todos" && (activeCategory === "Todos" || category === activeCategory),
-  );
+
+  useEffect(() => {
+    if (!previewItem && !orderOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [previewItem, orderOpen]);
+
+  const menuPriority: Partial<Record<(typeof siteData.menuCategories)[number], readonly string[]>> = {
+    "Rollos naturales": ["Dragón", "777", "California"],
+    "Rollos empanizados": ["Aguachile", "Tokio", "Flaka"],
+    "Rollos horneados": ["To-Te", "Salmoncito Especial", "Acá y Allá"],
+  };
+  const priority = menuPriority[activeCategory] || [];
+  const categoryItems = siteData.menuItems
+    .filter((item) => item.category === activeCategory)
+    .sort((first, second) => {
+      const firstIndex = priority.indexOf(first.name);
+      const secondIndex = priority.indexOf(second.name);
+      const firstRank = firstIndex === -1 ? Number.MAX_SAFE_INTEGER : firstIndex;
+      const secondRank = secondIndex === -1 ? Number.MAX_SAFE_INTEGER : secondIndex;
+      return firstRank - secondRank;
+    });
+  const visibleItems = expandedCategory ? categoryItems : categoryItems.slice(0, compactItemCount);
 
   function getItemId(item: (typeof siteData.menuItems)[number]) {
     return `${item.category}-${item.name}`;
@@ -152,7 +223,7 @@ function MenuSection() {
         ...selectedItems.map((item) => {
           const quantity = quantities[getItemId(item)];
           const subtotal = getUnitPrice(item) * quantity;
-          return `• ${quantity} × ${item.name} (${item.price} c/u) — $${subtotal}`;
+          return `• ${quantity} × ${item.name} (${item.price} MXN c/u) — $${subtotal} MXN`;
         }),
         "",
         `Total estimado: $${orderTotal} MXN`,
@@ -188,9 +259,7 @@ function MenuSection() {
     return item.description || item.topping || [item.inside, item.outside].filter(Boolean).join(" · ");
   }
 
-  const previewItems = siteData.menuItems.filter(
-    (item) => activeCategory === "Todos" || item.category === activeCategory,
-  );
+  const previewItems = siteData.menuItems.filter((item) => item.category === activeCategory);
   const previewIndex = previewItem
     ? previewItems.findIndex((item) => getItemId(item) === getItemId(previewItem))
     : -1;
@@ -216,7 +285,6 @@ function MenuSection() {
       <div className="container">
         <div className="section-heading menu-heading">
           <div>
-            <p className="eyebrow"><span /> Precios en MXN</p>
             <h2>Menú</h2>
           </div>
           <p className="section-intro">
@@ -234,7 +302,10 @@ function MenuSection() {
                 type="button"
                 role="tab"
                 aria-selected={activeCategory === category}
-                onClick={() => setActiveCategory(category)}
+                onClick={() => {
+                  setActiveCategory(category);
+                  setExpandedCategory(false);
+                }}
               >
                 {category}
                 {activeCategory === category && <span className="tab-indicator" />}
@@ -252,16 +323,13 @@ function MenuSection() {
             exit="hidden"
             key={activeCategory}
           >
-            {visibleCategories.map((category) => {
-              const items = siteData.menuItems.filter((item) => item.category === category);
-              return (
-                <motion.section className="menu-group" key={category} variants={cardVariants}>
-                  <div className="menu-group-heading">
-                    <h3>{category}</h3>
-                    <span>{items.length} productos</span>
-                  </div>
-                  <div className="menu-grid">
-                    {items.map((item) => {
+            <motion.section className="menu-group" key={`${activeCategory}-${expandedCategory}`} variants={cardVariants}>
+              <div className="menu-group-heading">
+                <h3>{activeCategory}</h3>
+                <span>{categoryItems.length} productos</span>
+              </div>
+              <div className="menu-grid">
+                {visibleItems.map((item) => {
                       const itemId = getItemId(item);
                       const quantity = quantities[itemId] || 0;
                       const isSelected = quantity > 0;
@@ -272,6 +340,11 @@ function MenuSection() {
                         variants={cardVariants}
                         whileHover={reduceMotion ? undefined : { y: -3 }}
                         onMouseMove={setSpotlight}
+                        onClick={(event) => {
+                          if ((event.target as HTMLElement).closest("button, label, input")) return;
+                          setPreviewDirection(0);
+                          setPreviewItem(item);
+                        }}
                         style={{ "--card-image": `url("${withBasePath(item.image)}")` } as CSSProperties}
                       >
                         <label className="menu-select" title={`Seleccionar ${item.name}`}>
@@ -302,25 +375,31 @@ function MenuSection() {
                             {isSelected ? (
                               <span className="menu-selected-copy">{quantity} en tu pedido</span>
                             ) : item.tag ? <span className="menu-tag">{item.tag}</span> : <span />}
-                            <span className="menu-price">{item.price}</span>
+                            <span className="menu-price">{item.price} MXN</span>
                           </div>
                         </div>
                       </motion.article>
                       );
-                    })}
-                  </div>
-                </motion.section>
-              );
-            })}
+                })}
+              </div>
+              {categoryItems.length > compactItemCount && (
+                <div className="menu-pagination">
+                  <button
+                    type="button"
+                    className="menu-more-button"
+                    onClick={() => setExpandedCategory((expanded) => !expanded)}
+                    aria-expanded={expandedCategory}
+                  >
+                    {expandedCategory ? "Ver menos" : "Ver más"}
+                  </button>
+                </div>
+              )}
+            </motion.section>
           </motion.div>
         </AnimatePresence>
-        <div className="menu-bottom-row">
-          <p className="data-note">{siteData.menuNote}</p>
-        </div>
         </div>
       </div>
-      <AnimatePresence>
-        {selectedItems.length > 0 && !previewItem && !orderOpen && (
+      {selectedItems.length > 0 && !previewItem && !orderOpen && (
           <motion.button
             className="order-fab button button-primary"
             type="button"
@@ -337,8 +416,9 @@ function MenuSection() {
             </span>
           </motion.button>
         )}
-        {previewItem && (
+        {previewItem && createPortal(
           <motion.div
+            key="product-preview-modal"
             className="product-preview-backdrop"
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -433,7 +513,7 @@ function MenuSection() {
                     <span className="product-preview-category">{previewItem.category}</span>
                     <div className="product-preview-title-row">
                       <h2 id="product-preview-title">{previewItem.name}</h2>
-                      <strong>{previewItem.price}</strong>
+                      <strong>{previewItem.price} MXN</strong>
                     </div>
                     {previewItem.description && <p className="product-preview-description">{previewItem.description}</p>}
                     <div className="product-preview-details">
@@ -474,10 +554,12 @@ function MenuSection() {
                 </motion.div>
               </AnimatePresence>
             </motion.div>
-          </motion.div>
+          </motion.div>,
+          document.body,
         )}
-        {orderOpen && selectedItems.length > 0 && (
+        {orderOpen && selectedItems.length > 0 && createPortal(
           <motion.div
+            key="order-review-modal"
             className="order-modal-backdrop"
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -517,7 +599,7 @@ function MenuSection() {
                     <div className="order-line" key={itemId}>
                       <div>
                         <strong>{item.name}</strong>
-                        <span>{item.price} c/u</span>
+                        <span>{item.price} MXN c/u</span>
                       </div>
                       <div className="order-line-controls">
                         <div className="quantity-control">
@@ -550,9 +632,9 @@ function MenuSection() {
                 Confirmar por WhatsApp
               </a>
             </motion.div>
-          </motion.div>
+          </motion.div>,
+          document.body,
         )}
-      </AnimatePresence>
     </section>
   );
 }
@@ -572,7 +654,7 @@ function PromotionSection() {
           <div className="promotion-copy">
             <p className="eyebrow"><span /> {siteData.promotion.label}</p>
             <h2>{siteData.promotion.title}</h2>
-            <strong className="promotion-offer">{siteData.promotion.offer}</strong>
+            <strong className="promotion-offer"><span>{siteData.promotion.offer}</span> MXN</strong>
             <p>{siteData.promotion.description}</p>
             <span className="promotion-footnote">{siteData.promotion.footnote}</span>
           </div>
@@ -588,7 +670,6 @@ function AboutSection() {
       <div className="container">
         <div className="about-panel">
           <div className="about-heading">
-            <p className="eyebrow"><span /> La historia de CAE</p>
             <h2>Quiénes somos</h2>
           </div>
           <div className="about-grid">
@@ -621,13 +702,19 @@ function LocationSection() {
       <div className="container">
         <div className="location-panel">
           <div className="location-copy">
-            <p className="eyebrow"><span /> Visítanos</p>
             <h2>Ubicación y horarios</h2>
             <address className="location-address">{siteData.address}</address>
             <div className="hours-block">
               <h3>Horarios</h3>
-              <strong>1:00 a 10:00 p. m.</strong>
-              <p>Miércoles cerrado</p>
+              <div className="hours-list">
+                <p><span>Lunes</span><strong>2:00 p. m. a 10:00 p. m.</strong></p>
+                <p><span>Martes</span><strong>2:00 p. m. a 10:00 p. m.</strong></p>
+                <p className="closed"><span>Miércoles</span><strong>Cerrado</strong></p>
+                <p><span>Jueves</span><strong>2:00 p. m. a 10:00 p. m.</strong></p>
+                <p><span>Viernes</span><strong>2:00 p. m. a 10:00 p. m.</strong></p>
+                <p><span>Sábado</span><strong>2:00 p. m. a 10:00 p. m.</strong></p>
+                <p><span>Domingo</span><strong>1:00 p. m. a 8:00 p. m.</strong></p>
+              </div>
             </div>
             <h3 className="contact-heading">Contacto</h3>
             <a className="location-phone" href={`tel:${siteData.phone.replace(/\s/g, "")}`}>
@@ -653,10 +740,6 @@ function LocationSection() {
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen
           />
-          <a className="map-caption" href={directionsUrl} target="_blank" rel="noopener noreferrer">
-            <span><MapPin size={16} aria-hidden="true" /> San Andrés Cholula, Puebla</span>
-            <ArrowUpRight size={16} aria-hidden="true" />
-          </a>
           </div>
         </div>
       </div>
@@ -665,53 +748,173 @@ function LocationSection() {
 }
 
 export function SiteExperience() {
+  const [activeSlide, setActiveSlide] = useState<SlideId>("#inicio");
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    const syncHash = () => {
+      const hash = window.location.hash as SlideId;
+      if (navItems.some((item) => item.href === hash)) setActiveSlide(hash);
+    };
+    const navigateWithKeyboard = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.closest("input, textarea, select, button, [role='dialog']")) return;
+
+      const currentIndex = navItems.findIndex((item) => item.href === activeSlide);
+      const offset = event.key === "ArrowRight" || event.key === "ArrowDown"
+        ? 1
+        : event.key === "ArrowLeft" || event.key === "ArrowUp"
+          ? -1
+          : 0;
+      if (!offset) return;
+
+      event.preventDefault();
+      const nextIndex = Math.min(navItems.length - 1, Math.max(0, currentIndex + offset));
+      navigateTo(navItems[nextIndex].href);
+    };
+
+    syncHash();
+    window.addEventListener("hashchange", syncHash);
+    window.addEventListener("popstate", syncHash);
+    window.addEventListener("keydown", navigateWithKeyboard);
+    return () => {
+      window.removeEventListener("hashchange", syncHash);
+      window.removeEventListener("popstate", syncHash);
+      window.removeEventListener("keydown", navigateWithKeyboard);
+    };
+  }, [activeSlide]);
+
+  function navigateTo(slide: SlideId) {
+    setActiveSlide(slide);
+    window.history.pushState(null, "", slide);
+  }
+
+  function handleInternalNavigation(event: MouseEvent<HTMLElement>) {
+    if (event.defaultPrevented) return;
+
+    const anchor = (event.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
+    if (!anchor) return;
+
+    const slide = anchor.hash as SlideId;
+    if (navItems.some((item) => item.href === slide)) {
+      event.preventDefault();
+      navigateTo(slide);
+    }
+  }
+
+  function handleTouchStart(event: TouchEvent<HTMLDivElement>) {
+    if (!window.matchMedia("(max-width: 680px)").matches) return;
+    const target = event.target as HTMLElement;
+    if (target.closest("button, a, input, textarea, select, iframe, [role='dialog']")) return;
+
+    const touch = event.touches[0];
+    touchStart.current = { x: touch.clientX, y: touch.clientY };
+  }
+
+  function handleTouchEnd(event: TouchEvent<HTMLDivElement>) {
+    if (!touchStart.current) return;
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - touchStart.current.x;
+    const deltaY = touch.clientY - touchStart.current.y;
+    touchStart.current = null;
+
+    if (Math.abs(deltaX) < 56 || Math.abs(deltaX) < Math.abs(deltaY) * 1.25) return;
+
+    const currentIndex = navItems.findIndex((item) => item.href === activeSlide);
+    const nextIndex = Math.min(
+      navItems.length - 1,
+      Math.max(0, currentIndex + (deltaX < 0 ? 1 : -1)),
+    );
+    if (nextIndex !== currentIndex) navigateTo(navItems[nextIndex].href);
+  }
+
+  function slideState(slide: SlideId) {
+    return {
+      "data-active": activeSlide === slide,
+      "aria-hidden": activeSlide !== slide,
+    };
+  }
+
   return (
-    <main className="site-content">
-        <section
-          className="hero-section"
-          id="inicio"
-          style={{ "--hero-background": `url("${withBasePath(siteData.heroImage)}")` } as CSSProperties}
-        >
-          <SiteNavigation />
-          <a className="hero-logo" href="#inicio" aria-label="CAE Sushi, inicio">
-            <Image
-              src={withBasePath(siteData.logo)}
-              alt="CAE Sushi"
-              width={2100}
-              height={1200}
-              priority
-            />
-          </a>
-          <div className="container hero-layout">
-            <div className="hero-copy">
-              <p className="eyebrow"><span /> Sushi estilo culichi · Cholula</p>
-              <h1>Rollos de Sushi<br /><em>que sí llenan</em></h1>
-              <div className="hero-actions">
-                <a className="button button-primary" href="#menu">Ver menú</a>
-                <a
-                  className="button button-whatsapp"
-                  href={getWhatsAppUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <SiWhatsapp size={18} aria-hidden="true" />
-                  Pedir para recoger
+    <main className="site-content" data-active-slide={activeSlide} onClick={handleInternalNavigation}>
+      <SiteNavigation activeSlide={activeSlide} onNavigate={navigateTo} />
+      <div className="slides-stage" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+        <motion.div className="experience-slide hero-slide" {...slideState("#inicio")}>
+          <section className="hero-section" id="inicio">
+            <div className="container home-dashboard">
+              <div className="hero-layout">
+                <div className="hero-copy">
+                  <h1>Rollos de <em>Sushi</em><br />que sí <em>llenan</em>.</h1>
+                  <p className="hero-description">Sushi estilo culichi preparado al momento en San Andrés Cholula.</p>
+                  <div className="hero-actions">
+                    <a className="button button-primary" href="#menu" onClick={(event) => {
+                      event.preventDefault();
+                      navigateTo("#menu");
+                    }}>Ver menú</a>
+                    <a
+                      className="button button-whatsapp"
+                      href={getWhatsAppUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <SiWhatsapp size={18} aria-hidden="true" />
+                      Pedir para recoger
+                    </a>
+                  </div>
+                </div>
+                <div
+                  className="hero-photo-card"
+                  role="img"
+                  aria-label="Platillos de sushi de CAE Sushi"
+                  style={{ "--hero-background": `url("${withBasePath(siteData.heroImage)}")` } as CSSProperties}
+                />
+              </div>
+
+              <div className="home-summary-grid">
+                <a className="home-summary home-promotion" href="#promocion">
+                  <span className="home-summary-copy">
+                    <span className="home-summary-label">Promos</span>
+                    <strong>2 rollos naturales por $250</strong>
+                    <span className="home-summary-link">Ver promoción</span>
+                  </span>
+                </a>
+                <a className="home-summary" href="#quienes-somos">
+                  <span className="home-summary-copy">
+                    <span className="home-summary-label">Quiénes somos</span>
+                    <p>Más de ocho años preparando sushi con sabor y atención de casa.</p>
+                    <span className="home-summary-link">Conócenos</span>
+                  </span>
+                </a>
+                <a className="home-summary home-location" href="#ubicacion">
+                  <span className="home-summary-copy">
+                    <span className="home-summary-label">Ubicación y horarios</span>
+                    <p>{siteData.address}</p>
+                    <span className="home-summary-link">Ver ubicación</span>
+                  </span>
                 </a>
               </div>
+              <a className="mobile-directions-button" href="#ubicacion">
+                Cómo llegar
+              </a>
             </div>
-          </div>
-          <div className="hero-bottom container">
-            <span>Un antojo, muchas formas de disfrutarlo</span>
-            <span className="hero-bottom-rule" />
-            <span>San Andrés Cholula, Pue.</span>
-          </div>
-        </section>
+          </section>
+        </motion.div>
 
-        <MenuSection />
-        <PromotionSection />
-        <AboutSection />
-        <LocationSection />
-        <SlideFooter />
-      </main>
+        <motion.div className="experience-slide menu-slide" {...slideState("#menu")}>
+          <MenuSection />
+        </motion.div>
+        <motion.div className="experience-slide" {...slideState("#promocion")}>
+          <PromotionSection />
+        </motion.div>
+        <motion.div className="experience-slide" {...slideState("#quienes-somos")}>
+          <AboutSection />
+        </motion.div>
+        <motion.div className="experience-slide location-slide" {...slideState("#ubicacion")}>
+          <LocationSection />
+        </motion.div>
+      </div>
+      <SlideFooter />
+    </main>
   );
 }
